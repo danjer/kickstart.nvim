@@ -141,9 +141,16 @@ return {
     table.insert(dap.configurations.python, {
       type = 'python',
       request = 'launch',
-      name = 'Django runserver',
+      name = 'debug django runserver',
       program = vim.fn.getcwd() .. '/manage.py',
       args = { 'runserver', '--noreload' },
+    })
+    table.insert(dap.configurations.python, {
+      type = 'python',
+      request = 'launch',
+      name = 'debug django test',
+      program = vim.fn.getcwd() .. '/manage.py',
+      args = { 'test' },
     })
     -- Install golang specific config
     require('dap-go').setup {
