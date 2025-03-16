@@ -138,6 +138,13 @@ return {
     dap.listeners.before.event_terminated['dapui_config'] = dapui.close
     dap.listeners.before.event_exited['dapui_config'] = dapui.close
 
+    table.insert(dap.configurations.python, {
+      type = 'python',
+      request = 'launch',
+      name = 'Django runserver',
+      program = vim.fn.getcwd() .. '/manage.py',
+      args = { 'runserver', '--noreload' },
+    })
     -- Install golang specific config
     require('dap-go').setup {
       delve = {
@@ -146,7 +153,6 @@ return {
         detached = vim.fn.has 'win32' == 0,
       },
     }
-
     require('dap-python').setup()
   end,
 }
