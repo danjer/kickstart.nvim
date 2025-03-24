@@ -8,4 +8,8 @@ vim.keymap.set('n', '<leader>dr', ':split | terminal python manage.py runserver<
 
 return {
   require 'custom.plugins.none-ls',
+  require 'custom.plugins.lazy-git',
+  require 'custom.plugins.flutter-tools',
+  require 'custom.plugins.toggleterm',
+  require 'custom.plugins.venv-selector',
 }

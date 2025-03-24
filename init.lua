@@ -19,7 +19,6 @@
 ========                                                     ========
 =====================================================================
 =====================================================================
-
 What is Kickstart?
 
   Kickstart.nvim is *not* a distribution.
@@ -155,6 +154,10 @@ vim.opt.cursorline = true
 
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 10
+
+-- Spell check
+vim.o.spelllang = 'en_us'
+vim.o.spell = true
 
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
