@@ -142,7 +142,7 @@ return {
       type = 'python',
       request = 'launch',
       name = 'debug django runserver',
-      program = vim.fn.getcwd() .. '/manage.py',
+      program = vim.fn.getcwd() .. '/oauth_django/oauth_django/manage.py',
       args = { 'runserver', '--noreload' },
     })
     table.insert(dap.configurations.python, {
