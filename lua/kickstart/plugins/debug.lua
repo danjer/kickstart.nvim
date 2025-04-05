@@ -1,10 +1,9 @@
 -- debug.lua
 --
 -- Shows how to use the DAP plugin to debug your code.
---
+
 -- Primarily focused on configuring the debugger for Go, but can
 -- be extended to other languages as well. That's why it's called
--- kickstart.nvim and not kitchen-sink.nvim ;)
 
 return {
   -- NOTE: Yes, you can install new plugins here!
@@ -138,18 +137,52 @@ return {
     dap.listeners.before.event_terminated['dapui_config'] = dapui.close
     dap.listeners.before.event_exited['dapui_config'] = dapui.close
 
+    -- In the config function, before the dap configuration sections
+    local function get_django_manage_py_path()
+      local cwd = vim.fn.getcwd()
+      local default_relative_path = 'manage.py'
+      local relative_path = vim.fn.input('Relative path from ' .. cwd .. ': ', default_relative_path)
+
+      -- If input is empty, use the default
+      if relative_path == '' then
+        relative_path = default_relative_path
+      end
+
+      -- Check if the path is absolute
+      local is_absolute = false
+      if vim.fn.has 'win32' == 1 then
+        -- Windows: check for drive letter or UNC path
+        is_absolute = relative_path:match '^%a:' or relative_path:match '^\\\\'
+      else
+        -- Unix: check for leading /
+        is_absolute = relative_path:sub(1, 1) == '/'
+      end
+
+      -- Return absolute path as is, or join with cwd if relative
+      if is_absolute then
+        return relative_path
+      else
+        -- Join with / (works in Neovim on both platforms)
+        return cwd .. '/' .. relative_path
+      end
+    end
+
     table.insert(dap.configurations.python, {
       type = 'python',
       request = 'launch',
       name = 'debug django runserver',
-      program = vim.fn.getcwd() .. '/manage.py',
+      program = function()
+        return get_django_manage_py_path()
+      end,
       args = { 'runserver', '--noreload' },
     })
     table.insert(dap.configurations.python, {
       type = 'python',
       request = 'launch',
       name = 'debug django test',
-      program = vim.fn.getcwd() .. '/manage.py',
+      program = function()
+        return get_django_manage_py_path()
+      end,
       args = { 'test' },
     })
     -- Install golang specific config
