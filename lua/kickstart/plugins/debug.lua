@@ -125,7 +125,7 @@ return {
     -- vim.api.nvim_set_hl(0, 'DapBreak', { fg = '#e51400' })
     -- vim.api.nvim_set_hl(0, 'DapStop', { fg = '#ffcc00' })
     -- local breakpoint_icons = vim.g.have_nerd_font
-    --     and { Breakpoint = '', BreakpointCondition = '', BreakpointRejected = '', LogPoint = '', Stopped = '' }
+    --     and { Breakpoint = '', BreakpointCondition = '', BreakpointRejected = '', LogPoint = '', Stopped = '' }
     --   or { Breakpoint = '●', BreakpointCondition = '⊜', BreakpointRejected = '⊘', LogPoint = '◆', Stopped = '⭔' }
     -- for type, icon in pairs(breakpoint_icons) do
     --   local tp = 'Dap' .. type
@@ -137,54 +137,23 @@ return {
     dap.listeners.before.event_terminated['dapui_config'] = dapui.close
     dap.listeners.before.event_exited['dapui_config'] = dapui.close
 
-    -- In the config function, before the dap configuration sections
-    local function get_django_manage_py_path()
-      local cwd = vim.fn.getcwd()
-      local default_relative_path = 'manage.py'
-      local relative_path = vim.fn.input('Relative path from ' .. cwd .. ': ', default_relative_path)
-
-      -- If input is empty, use the default
-      if relative_path == '' then
-        relative_path = default_relative_path
-      end
-
-      -- Check if the path is absolute
-      local is_absolute = false
-      if vim.fn.has 'win32' == 1 then
-        -- Windows: check for drive letter or UNC path
-        is_absolute = relative_path:match '^%a:' or relative_path:match '^\\\\'
-      else
-        -- Unix: check for leading /
-        is_absolute = relative_path:sub(1, 1) == '/'
-      end
-
-      -- Return absolute path as is, or join with cwd if relative
-      if is_absolute then
-        return relative_path
-      else
-        -- Join with / (works in Neovim on both platforms)
-        return cwd .. '/' .. relative_path
-      end
-    end
-
+    -- Django debug configurations
     table.insert(dap.configurations.python, {
       type = 'python',
       request = 'launch',
       name = 'debug django runserver',
-      program = function()
-        return get_django_manage_py_path()
-      end,
+      program = './manage.py',
       args = { 'runserver', '--noreload' },
     })
+
     table.insert(dap.configurations.python, {
       type = 'python',
       request = 'launch',
       name = 'debug django test',
-      program = function()
-        return get_django_manage_py_path()
-      end,
+      program = './manage.py',
       args = { 'test' },
     })
+
     -- Install golang specific config
     require('dap-go').setup {
       delve = {
