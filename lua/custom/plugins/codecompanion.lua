@@ -4,6 +4,22 @@ return {
     'nvim-lua/plenary.nvim',
     'nvim-treesitter/nvim-treesitter',
     'MeanderingProgrammer/render-markdown.nvim', -- Add this plugin for markdown rendering
+    {
+      'saghen/blink.cmp',
+      lazy = false,
+      version = '*',
+      opts = {
+        keymap = {
+          preset = 'enter',
+          ['<S-Tab>'] = { 'select_prev', 'fallback' },
+          ['<Tab>'] = { 'select_next', 'fallback' },
+        },
+        cmdline = { sources = { 'cmdline' } },
+        sources = {
+          default = { 'lsp', 'path', 'buffer', 'codecompanion' },
+        },
+      },
+    },
   },
   config = function()
     -- Set up the codecompanion.nvim with Ollama adapter
@@ -11,9 +27,11 @@ return {
       strategies = {
         chat = {
           adapter = 'anthropic',
+          commands = true,
         },
         inline = {
           adapter = 'anthropic',
+          commands = true,
         },
       },
       adapters = {
