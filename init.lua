@@ -338,6 +338,7 @@ require('lazy').setup({
         { '<leader>w', group = '[W]orkspace' },
         { '<leader>t', group = '[T]oggle' },
         { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
+        { '<leader>ai', group = '[AI] CodeCompanion', mode = { 'n', 'v' } }, -- Add this line
       },
     },
   },
@@ -777,8 +778,8 @@ require('lazy').setup({
         if vim.g.format_on_save == false then
           return false
         end
-        if vim.bo[bufnr].filetype == "python" then
-            return false -- exculde python from this setup, I wan't to use null-ls for this
+        if vim.bo[bufnr].filetype == 'python' then
+          return false -- exculde python from this setup, I wan't to use null-ls for this
         end
 
         -- Disable "format_on_save lsp_fallback" for languages that don't
@@ -1082,8 +1083,6 @@ require('lazy').setup({
     },
   },
 })
-
-vim.keymap.set('n', '<leader>cc', '<cmd>CodeCompanionChat<cr>', { desc = 'Open CodeCompanion Chat' })
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et

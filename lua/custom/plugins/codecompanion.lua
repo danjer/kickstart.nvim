@@ -3,7 +3,7 @@ return {
   dependencies = {
     'nvim-lua/plenary.nvim',
     'nvim-treesitter/nvim-treesitter',
-    'MeanderingProgrammer/render-markdown.nvim', -- Add this plugin for markdown rendering
+    'MeanderingProgrammer/render-markdown.nvim',
     {
       'saghen/blink.cmp',
       lazy = false,
@@ -22,7 +22,12 @@ return {
     },
   },
   config = function()
-    -- Set up the codecompanion.nvim with Ollama adapter
+    -- Register which-key group first
+    local wk = require 'which-key'
+    wk.register {
+      ['<leader>ai'] = { name = '[AI] CodeCompanion' },
+    }
+
     require('codecompanion').setup {
       strategies = {
         chat = {
@@ -38,10 +43,10 @@ return {
         ollama = function()
           return require('codecompanion.adapters').extend('ollama', {
             env = {
-              url = 'http://localhost:11434', -- Ollama server URL
+              url = 'http://localhost:11434',
             },
             parameters = {
-              sync = true, -- Optional: sync mode for request
+              sync = true,
             },
           })
         end,
@@ -53,21 +58,11 @@ return {
           })
         end,
       },
-      keymaps = {
-        -- Chat toggles and navigation
-        ['<leader>cc'] = { ':CodeCompanionToggle<CR>', 'Toggle chat window' },
-        ['<leader>ch'] = { ':CodeCompanionHistory<CR>', 'View chat history' },
-
-        -- Code actions
-        ['<leader>cs'] = { ':CodeCompanionChat<CR>', 'Send selection to chat', mode = { 'v' } },
-        ['<leader>cf'] = { ':CodeCompanionFile<CR>', 'Send file to chat' },
-
-        -- Code generation and analysis
-        ['<leader>ci'] = { ':CodeCompanionInline<CR>', 'Generate inline completion', mode = { 'n', 'v' } },
-        ['<leader>cr'] = { ':CodeCompanionReview<CR>', 'Review selected code', mode = { 'v' } },
-        ['<leader>ct'] = { ':CodeCompanionTest<CR>', 'Generate unit tests', mode = { 'v' } },
-        ['<leader>cx'] = { ':CodeCompanionExplain<CR>', 'Explain code', mode = { 'v' } },
-      },
     }
+
+    -- Define keymaps directly with vim.keymap.set
+    vim.keymap.set({ 'n', 'v' }, '<leader>aia', '<cmd>CodeCompanionActions<cr>', { noremap = true, silent = true })
+    vim.keymap.set({ 'n', 'v' }, '<leader>ait', '<cmd>CodeCompanionChat Toggle<cr>', { noremap = true, silent = true })
+    vim.keymap.set('v', 'ga', '<cmd>CodeCompanionChat Add<cr>', { noremap = true, silent = true })
   end,
 }
