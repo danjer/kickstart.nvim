@@ -109,10 +109,10 @@ return {
       controls = {
         icons = {
           pause = '⏸',
-          play = '▶',
-          step_into = '⏎',
-          step_over = '⏭',
-          step_out = '⏮',
+          play = '▶ [F5]', -- Start/Continue
+          step_into = '⏎ [F1]', -- Step Into
+          step_over = '⏭ [F2]', -- Step Over
+          step_out = '⏮ [F3]', -- Step Out
           step_back = 'b',
           run_last = '▶▶',
           terminate = '⏹',
