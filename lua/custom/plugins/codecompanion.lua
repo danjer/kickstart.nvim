@@ -31,19 +31,19 @@ return {
     require('codecompanion').setup {
       strategies = {
         chat = {
-          adapter = 'anthropic',
+          adapter = 'lmstudio',
           commands = true,
         },
         inline = {
-          adapter = 'anthropic',
+          adapter = 'lmstudio',
           commands = true,
         },
       },
       adapters = {
-        ollama = function()
-          return require('codecompanion.adapters').extend('ollama', {
+        lmstudio = function()
+          return require('codecompanion.adapters').extend('openai_compatible', {
             env = {
-              url = 'http://localhost:11434',
+              url = 'http://localhost:1234',
             },
             parameters = {
               sync = true,
