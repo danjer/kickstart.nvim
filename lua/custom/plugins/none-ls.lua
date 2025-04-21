@@ -7,7 +7,7 @@ return {
   },
   config = function()
     local null_ls = require 'null-ls'
-    local formatting = null_ls.builtins.formatting -- to setup formatters
+    local formatting = null_ls.builtins.formatting   -- to setup formatters
     local diagnostics = null_ls.builtins.diagnostics -- to setup linters
 
     -- list of formatters & linters for mason to install
@@ -15,7 +15,7 @@ return {
       ensure_installed = {
         'checkmake',
         'prettier', -- ts/js formatter
-        'stylua', -- lua formatter
+        'stylua',   -- lua formatter
         'eslint_d', -- ts/js linter
         'shfmt',
         'ruff',
@@ -30,8 +30,8 @@ return {
       formatting.stylua,
       formatting.shfmt.with { args = { '-i', '4' } },
       formatting.terraform_fmt,
-      require('none-ls.formatting.ruff').with { extra_args = { '--extend-select', 'I' } },
-      require 'none-ls.formatting.ruff_format',
+      require('none-ls.formatting.ruff').with { extra_args = { '--extend-select', 'I',  } },
+      require('none-ls.formatting.ruff_format').with { extra_args = {'--line-length', '79'}},
     }
 
     local augroup = vim.api.nvim_create_augroup('LspFormatting', {})
@@ -42,13 +42,17 @@ return {
       on_attach = function(client, bufnr)
         if client.supports_method 'textDocument/formatting' then
           vim.api.nvim_clear_autocmds { group = augroup, buffer = bufnr }
-          vim.api.nvim_create_autocmd('BufWritePre', {
-            group = augroup,
-            buffer = bufnr,
-            callback = function()
-              vim.lsp.buf.format { async = false }
-            end,
-          })
+
+          -- Only set up auto formatting if format_on_save is true or not set
+          if vim.g.format_on_save ~= false then
+            vim.api.nvim_create_autocmd('BufWritePre', {
+              group = augroup,
+              buffer = bufnr,
+              callback = function()
+                vim.lsp.buf.format { async = false }
+              end,
+            })
+          end
         end
       end,
     }

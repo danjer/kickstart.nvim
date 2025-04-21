@@ -88,6 +88,7 @@ P.S. You can delete this when you're done too. It's your config now! :)
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
+vim.g.format_on_save = false
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = true
@@ -337,6 +338,7 @@ require('lazy').setup({
         { '<leader>w', group = '[W]orkspace' },
         { '<leader>t', group = '[T]oggle' },
         { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
+        { '<leader>ai', group = '[AI] CodeCompanion', mode = { 'n', 'v' } }, -- Add this line
       },
     },
   },
@@ -675,18 +677,18 @@ require('lazy').setup({
         -- But for many setups, the LSP (`ts_ls`) will work just fine
         -- ts_ls = {},
         --
-        pylsp = {
+        pyright = {
           settings = {
-            pylsp = {
-              plugins = {
-                pyflakes = { enabled = false },
-                pycodestyle = { enabled = false },
-                autopep8 = { enabled = false },
-                yapf = { enabled = false },
-                mccabe = { enabled = false },
-                pylsp_mypy = { enabled = false },
-                pylsp_black = { enabled = false },
-                pylsp_isort = { enabled = false },
+            python = {
+              analysis = {
+                autoImportCompletions = true,
+                autoSearchPaths = true,
+                diagnosticMode = 'workspace',
+                useLibraryCodeForTypes = true,
+                diagnosticSeverityOverrides = {
+                  reportMissingImports = 'error',
+                  reportUnusedImport = 'warning',
+                },
               },
             },
           },
@@ -723,7 +725,8 @@ require('lazy').setup({
       -- for you, so that they are available from within Neovim.
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
-        'stylua', -- Used to format Lua code
+        'stylua', -- Used to format LuaSn,'populate'
+        'pyright',
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -757,10 +760,28 @@ require('lazy').setup({
         mode = '',
         desc = '[F]ormat buffer',
       },
+      -- Add a toggle for format-on-save
+      {
+        '<leader>tf',
+        function()
+          vim.g.format_on_save = not vim.g.format_on_save
+          print('Format on save: ' .. (vim.g.format_on_save and 'enabled' or 'disabled'))
+        end,
+        desc = '[T]oggle [F]ormat on save',
+      },
     },
     opts = {
       notify_on_error = false,
+      -- Modify format_on_save to respect the global variable
       format_on_save = function(bufnr)
+        -- If format_on_save is disabled globally, don't format
+        if vim.g.format_on_save == false then
+          return false
+        end
+        if vim.bo[bufnr].filetype == 'python' then
+          return false -- exculde python from this setup, I wan't to use null-ls for this
+        end
+
         -- Disable "format_on_save lsp_fallback" for languages that don't
         -- have a well standardized coding style. You can add additional
         -- languages here or re-enable it for the disabled ones.
@@ -776,14 +797,7 @@ require('lazy').setup({
           lsp_format = lsp_format_opt,
         }
       end,
-      formatters_by_ft = {
-        lua = { 'stylua' },
-        -- Conform can also run multiple formatters sequentially
-        -- python = { "isort", "black" },
-        --
-        -- You can use 'stop_after_first' to run the first available formatter from the list
-        -- javascript = { "prettierd", "prettier", stop_after_first = true },
-      },
+      -- Rest of your configuration...
     },
   },
 
@@ -843,25 +857,54 @@ require('lazy').setup({
         --
         -- No, but seriously. Please read `:help ins-completion`, it is really good!
         mapping = cmp.mapping.preset.insert {
-          -- Select the [n]ext item
-          ['<C-n>'] = cmp.mapping.select_next_item(),
-          -- Select the [p]revious item
-          ['<C-p>'] = cmp.mapping.select_prev_item(),
-
-          -- Scroll the documentation window [b]ack / [f]orward
-          ['<C-b>'] = cmp.mapping.scroll_docs(-4),
-          ['<C-f>'] = cmp.mapping.scroll_docs(4),
-
-          -- Accept ([y]es) the completion.
-          --  This will auto-import if your LSP supports it.
+          -- -- Select the [n]ext item
+          -- ['<C-n>'] = cmp.mapping.select_next_item(),
+          -- -- Select the [p]revious item
+          -- ['<C-p>'] = cmp.mapping.select_prev_item(),
+          --
+          -- -- Scroll the documentation window [b]ack / [f]orward
+          -- ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+          -- ['<C-f>'] = cmp.mapping.scroll_docs(4),
+          --
+          -- -- Accept ([y]es) the completion.
+          -- --  This will auto-import if your LSP supports it.
           --  This will expand snippets if the LSP sent a snippet.
           ['<C-y>'] = cmp.mapping.confirm { select = true },
 
           -- If you prefer more traditional completion keymaps,
           -- you can uncomment the following lines
-          --['<CR>'] = cmp.mapping.confirm { select = true },
-          --['<Tab>'] = cmp.mapping.select_next_item(),
-          --['<S-Tab>'] = cmp.mapping.select_prev_item(),
+          -- ['<CR>'] = cmp.mapping {
+          --   i = function(fallback)
+          --     if cmp.visible() and cmp.get_active_entry() then
+          --       cmp.confirm { select = true }
+          --     else
+          --       fallback()
+          --     end
+          --   end,
+          --   s = function(fallback)
+          --     if cmp.visible() and cmp.get_active_entry() then
+          --       cmp.confirm { select = true }
+          --     else
+          --       fallback()
+          --     end
+          --   end,
+          --   c = function(fallback)
+          --     if cmp.visible() and cmp.get_active_entry() then
+          --       cmp.confirm { select = true }
+          --     else
+          --       fallback()
+          --     end
+          --   end,
+          --   v = function(fallback)
+          --     if cmp.visible() and cmp.get_active_entry() then
+          --       cmp.confirm { select = true }
+          --     else
+          --       fallback()
+          --     end
+          --   end,
+          -- },
+          ['<Tab>'] = cmp.mapping.select_next_item(),
+          ['<S-Tab>'] = cmp.mapping.select_prev_item(),
 
           -- Manually trigger a completion from nvim-cmp.
           --  Generally you don't need this, because nvim-cmp will display
@@ -923,7 +966,7 @@ require('lazy').setup({
       -- Load the colorscheme here.
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
+      vim.cmd.colorscheme 'tokyonight-moon'
     end,
   },
 

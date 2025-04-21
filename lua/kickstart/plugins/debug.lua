@@ -1,10 +1,9 @@
 -- debug.lua
 --
 -- Shows how to use the DAP plugin to debug your code.
---
+
 -- Primarily focused on configuring the debugger for Go, but can
 -- be extended to other languages as well. That's why it's called
--- kickstart.nvim and not kitchen-sink.nvim ;)
 
 return {
   -- NOTE: Yes, you can install new plugins here!
@@ -110,10 +109,10 @@ return {
       controls = {
         icons = {
           pause = '⏸',
-          play = '▶',
-          step_into = '⏎',
-          step_over = '⏭',
-          step_out = '⏮',
+          play = '▶ [F5]', -- Start/Continue
+          step_into = '⏎ [F1]', -- Step Into
+          step_over = '⏭ [F2]', -- Step Over
+          step_out = '⏮ [F3]', -- Step Out
           step_back = 'b',
           run_last = '▶▶',
           terminate = '⏹',
@@ -126,7 +125,7 @@ return {
     -- vim.api.nvim_set_hl(0, 'DapBreak', { fg = '#e51400' })
     -- vim.api.nvim_set_hl(0, 'DapStop', { fg = '#ffcc00' })
     -- local breakpoint_icons = vim.g.have_nerd_font
-    --     and { Breakpoint = '', BreakpointCondition = '', BreakpointRejected = '', LogPoint = '', Stopped = '' }
+    --     and { Breakpoint = '', BreakpointCondition = '', BreakpointRejected = '', LogPoint = '', Stopped = '' }
     --   or { Breakpoint = '●', BreakpointCondition = '⊜', BreakpointRejected = '⊘', LogPoint = '◆', Stopped = '⭔' }
     -- for type, icon in pairs(breakpoint_icons) do
     --   local tp = 'Dap' .. type
@@ -138,20 +137,23 @@ return {
     dap.listeners.before.event_terminated['dapui_config'] = dapui.close
     dap.listeners.before.event_exited['dapui_config'] = dapui.close
 
+    -- Django debug configurations
     table.insert(dap.configurations.python, {
       type = 'python',
       request = 'launch',
       name = 'debug django runserver',
-      program = vim.fn.getcwd() .. '/oauth_django/oauth_django/manage.py',
+      program = './manage.py',
       args = { 'runserver', '--noreload' },
     })
+
     table.insert(dap.configurations.python, {
       type = 'python',
       request = 'launch',
       name = 'debug django test',
-      program = vim.fn.getcwd() .. '/manage.py',
+      program = './manage.py',
       args = { 'test' },
     })
+
     -- Install golang specific config
     require('dap-go').setup {
       delve = {
